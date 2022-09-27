@@ -1,0 +1,147 @@
+import ast
+import math
+
+
+# function to convert to subscript
+def get_sub(x):
+    normal = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+-=()"
+    sub_s = "ₐ₈CDₑբGₕᵢⱼₖₗₘₙₒₚQᵣₛₜᵤᵥwₓᵧZₐ♭꜀ᑯₑբ₉ₕᵢⱼₖₗₘₙₒₚ૧ᵣₛₜᵤᵥwₓᵧ₂₀₁₂₃₄₅₆₇₈₉₊₋₌₍₎"
+    res = x.maketrans(''.join(normal), ''.join(sub_s))
+    return x.translate(res)
+
+
+# function to convert to superscript
+def get_super(x):
+    normal = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+-=()"
+    super_s = "ᴬᴮᶜᴰᴱᶠᴳᴴᴵᴶᴷᴸᴹᴺᴼᴾQᴿˢᵀᵁⱽᵂˣʸᶻᵃᵇᶜᵈᵉᶠᵍʰᶦʲᵏˡᵐⁿᵒᵖ۹ʳˢᵗᵘᵛʷˣʸᶻ⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻⁼⁽⁾"
+    res = x.maketrans(''.join(normal), ''.join(super_s))
+    return x.translate(res)
+
+
+def tipo_de_sucesion(primer_termino, segundo_termino, tercer_termino):
+    # Regresa Falso si la sucesión no es ni aritmética ni geométrica
+    if (segundo_termino - primer_termino) == (tercer_termino - segundo_termino):
+        tipo_sucesion = "Aritmética"
+        diferencia = segundo_termino - primer_termino
+        formula_general = "a{} = {} + (n - 1) * {}".format(get_sub("n"), primer_termino, diferencia)
+        return tipo_sucesion, diferencia, formula_general
+    elif (segundo_termino / primer_termino) == (tercer_termino / segundo_termino):
+        tipo_sucesion = "Geométrica"
+        razon = segundo_termino / primer_termino
+        formula_general = "a{} = {} * {}{}{}{} ".format(get_sub("n"), primer_termino, razon, get_super("n"), get_super("-"), get_super("1"))
+        return tipo_sucesion, razon, formula_general
+    else:
+        return False
+
+
+def calcular_termino_enesimo(numero, tipo_sucesion, primer_termino, razon):
+    # Ecuación general para calcular término enésimo
+    if tipo_sucesion == "Aritmética":
+        resultado = primer_termino + (numero - 1) * razon
+        return resultado
+    else:
+        resultado = primer_termino * razon ** (numero - 1)
+        return resultado
+
+
+def calcular_existe_numero(numero, tipo_sucesion, primer_termino, razon):
+    # Si el resultado no arroja un numero entero, sabemos que no está en la secuencia
+    if tipo_sucesion == "Aritmética":
+        resultado = (numero - primer_termino + razon) / razon
+        if resultado != int(resultado):
+            return resultado
+        else:
+            return int(resultado)
+    else:
+        paso_uno = numero / primer_termino
+        resultado = math.log(paso_uno, 10) / math.log(razon, 10) + 1
+        if resultado != int(resultado):
+            return resultado
+        else:
+            return int(resultado)
+
+def iterar_resultados(numero, tipo_sucesion, primer_termino, razon):
+    if tipo_sucesion == "Aritmética":
+        for i in range(1, numero + 1):
+            resultado = primer_termino + (i - 1) * razon
+            print("Indice: {}   Valor: {}".format(i, resultado))
+    else:
+        for i in range(1, numero + 1):
+            resultado = primer_termino * razon ** (i - 1)
+            print("Indice: {}   Valor: {}".format(i, resultado))
+
+
+def validar_opcion(texto, rango1, rango2):
+    # Sanitización de input
+    while True:
+        try:
+            opcion = int(input(texto))
+            if rango1 <= opcion <= rango2:
+                break
+            else:
+                print("\nDebe estar en el rango {} - {}".format(rango1, rango2))
+        except ValueError:
+            print("\nDebe ser un número")
+    return opcion
+
+
+def validar_numero(texto):
+    # ast.literal_eval convierte automaticamente int o float a su tipo correcto
+    while True:
+        try:
+            numero = ast.literal_eval((input(texto)))
+            if type(numero) is float:
+                break
+            elif type(numero) is int:
+                break
+        except ValueError:
+            print("\nDebe ser un número")
+    return numero
+
+# inciación de variables
+opcion = 0
+opcion_sub = 0
+
+# Menú
+while opcion != 9:
+    print("\nCalcular sucesiones aritméticas y geométricas\nDefiniendo los 3 primeros términos de una sucesión\n")
+    print("1. Definir sucesión con 3 primeros términos\n9. Salir")
+    opcion = validar_opcion("Elija opcion:    ", 1, 9)
+    if opcion == 1:
+        opcion_sub = 0
+        primer_termino = validar_numero("Escriba el primer término de la sucesión   ")
+        segundo_termino = validar_numero("Escriba el segundo término de la sucesión  ")
+        tercer_termino = validar_numero("Escriba el tercer término de la sucesión   ")
+        # Este bloque se inicializa si existe cualquier dato en la funcion tipo_de_sucesion (o sea, True)
+        if tipo_de_sucesion(primer_termino, segundo_termino, tercer_termino):
+            tipo_sucesion, razon, formula_general = tipo_de_sucesion(primer_termino, segundo_termino, tercer_termino)
+            print("La sucesión es de tipo {}, su razón o diferencia es de {} y su formula general es {}\n".format(tipo_sucesion, razon, formula_general))
+            while opcion_sub != 4:
+                print("¿Cual operación deseas hacer?\n1. Calcular el término enésimo de la sucesión\n2. Revisar si un número "
+                        "existe en la secuencia\n3. Iterar valores de la secuencia\n4. Probar otra secuencia")
+                opcion_sub = validar_opcion("Elija opción:    ", 1, 4)
+                if opcion_sub == 1:
+                    indice = validar_numero("¿Cúal es el índice que quieres buscar en la sucesión?  ")
+                    resultado = calcular_termino_enesimo(indice, tipo_sucesion, primer_termino, razon)
+                    print("La sucesión de tipo {} en el índice {} tiene un valor de {}".format(tipo_sucesion, indice, resultado))
+                elif opcion_sub == 2:
+                    numero = validar_numero("¿Cúal número deseas buscar en la secuencia?   ")
+                    resultado = calcular_existe_numero(numero, tipo_sucesion, primer_termino, razon)
+                    # Si el resultado es un decimal, sabemos que no está en nuestra secuencia
+                    if type(resultado) is float:
+                        print("El número {} no se encuentra en la secuencia, pero se acerca al índice {}".format(numero, resultado))
+                    else:
+                        print("El número {} se encuentra en el índice {}".format(numero, resultado))
+                elif opcion_sub == 3:
+                    numero = validar_opcion("¿Cuantos numeros quieres iterar? 1 - 500   ", 1, 500)
+                    iterar_resultados(numero, tipo_sucesion, primer_termino, razon)
+                elif opcion_sub == 4:
+                    break
+        else:
+            print("No es una sucesión Aritmética ni Geométrica")
+            opcion_sub = 4
+    elif opcion == 9:
+        print("Chao!")
+    else:
+        print("No existe esa opción, elije denuevo")
+
