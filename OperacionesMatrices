@@ -1,0 +1,202 @@
+import numpy as np
+import ast
+import time
+
+
+def validar_numero_rango(texto, rango1, rango2, sinrango=0):
+    # Valida que sea un número de rango1 - rango2, el argumento sinrango omite validar rango.
+    while True:
+        try:
+            opcion = int(input(texto))
+            if sinrango:
+                break
+            if rango1 <= opcion <= rango2:
+                break
+            else:
+                print("\nDebe estar en el rango {} - {}".format(rango1, rango2))
+        except ValueError:
+            print("\nDebe ser un número entero")
+    return opcion
+
+
+def validar_numero(texto, nofloat=0):
+    # ast.literal_eval convierte automaticamente int o float a su tipo correcto
+    while True:
+        try:
+            numero = ast.literal_eval((input(texto)))
+            if nofloat:
+                if type(numero) is float:
+                    print("Debe ser un numero entero")
+                else:
+                    break
+            else:
+                if type(numero) is float:
+                    break
+                elif type(numero) is int:
+                    break
+        except ValueError:
+            print("\nDebe ser un número")
+    return numero
+
+
+def crear_matriz(filas, columnas):
+    matriz = np.zeros((filas, columnas), dtype=object)  # inicializar matriz con zeros
+    for i in range(filas):
+        for j in range(columnas):
+            matriz[i][j] = validar_numero("Definir valor de posicion {} - {}\n".format(i+1, j+1))
+            print(matriz)
+    return matriz
+
+
+def sumar_matrices(matriz1, matriz2):
+    if matriz1.shape == matriz2.shape:
+        resultado = np.zeros((len(matriz1), len(matriz1[0])), dtype=object)
+        for i in range(len(matriz1)):
+            for j in range(len(matriz1[0])):
+                resultado[i][j] = matriz1[i][j] + matriz2[i][j]
+        # Escribir matriz1 + matriz2 entrega el mismo resultado en una lista
+        return resultado
+    else:
+        return "El orden de las matrices no es igual, por lo tanto no se puede sumar"
+
+
+def multiplicar_por_escalar(matriz, escalar):
+    for i in range(len(matriz)):
+        for j in range(len(matriz[0])):
+            matriz[i][j] = matriz[i][j] * escalar
+    # Escribir matriz * escalar da el mismo resultado en una lista
+    return matriz
+
+
+def transponer_matriz(matriz):
+    resultado = np.zeros((len(matriz[0]), len(matriz)), dtype=object)
+    for i in range(len(resultado)):
+        for j in range(len(resultado[0])):
+            resultado[i][j] = matriz[j][i]
+    return resultado
+    # El equivalente en numpy es matriz.tranpose() con numpy
+
+
+def multiplicar_matrices(matriz1, matriz2):
+    if matriz1.shape[1] == matriz2.shape[0]:
+        resultado = np.zeros((matriz1.shape[0], matriz2.shape[1]), dtype=object)
+        for i in range(len(resultado)):
+            for j in range(len(resultado[0])):
+                suma = 0
+                for k in range(matriz1.shape[1]):
+                    suma = suma + matriz1[i][k] * matriz2[k][j]
+                resultado[i][j] = suma
+        return resultado
+    # El equivalente a esto es usar matriz1.dot(matriz2) con numpy
+    else:
+        return "Las columnas de la primera matriz no son iguales a las filas de la segunda matriz, no se puede multiplicar"
+
+
+# Inicialización de variables
+
+opcion = 0
+opcion_lista = 0
+lista_matrices = []
+filas = 0
+columnas = 0
+indice = 1
+sub_op = 0
+
+# Menú
+
+while opcion != 7:
+    print("\nOperaciones de matrices, suma de matrices, multiplicación por escalar,"
+          " multiplicación de matrices y transposición")
+    print("1. Crear matriz\n2. Sumar matrices\n3. Transponer matriz\n4. Multiplicar matriz por escalar\n"
+          "5. Multiplicación de matrices\n6. Ver matrices guardadas\n7. Salir")
+    opcion = validar_numero_rango("Ingrese su opción:  ", 1, 7)
+    if opcion == 1:
+        filas = validar_numero("Ingrese numero de filas:  ", 1)
+        columnas = validar_numero("Ingrese numero de columnas:  ", 1)
+        lista_matrices.append(crear_matriz(filas, columnas))
+        print("\nMatriz creada y guardada en índice {}, puedes usarlas luego usando su numero de índice".format(indice))
+        indice += 1
+        time.sleep(2)
+    if opcion == 2:
+        if len(lista_matrices) < 2:
+            print("Crea otra matriz a la lista para sumar")
+        else:
+            matriz1 = lista_matrices[validar_numero_rango("Indique el índice de la primera matriz de la lista:  ", 1, len(lista_matrices)) - 1]
+            print(matriz1)
+            time.sleep(1)
+            matriz2 = lista_matrices[validar_numero_rango("Indique el índice de la segunda matriz de la lista:  ", 1, len(lista_matrices)) - 1]
+            print(matriz2)
+            time.sleep(1)
+            resultado = sumar_matrices(matriz1, matriz2)
+            print("El resultado de la suma es:\n{}".format(resultado))
+            if type(resultado) == str:
+                pass
+            else:
+                sub_op = validar_numero_rango("Quieres guardar esta matriz?\n1. Si\n2. No\nRespuesta: ", 1, 2)
+                if sub_op == 1:
+                    lista_matrices.append(resultado)
+                    print("Matriz guardada en índice {}".format(indice))
+                    indice += 1
+                    time.sleep(2)
+                else:
+                    pass
+    if opcion == 3:
+        matriz1 = lista_matrices[validar_numero_rango("Indique el índice matriz a transponer  ", 1, len(lista_matrices)) - 1]
+        print(matriz1)
+        time.sleep(1)
+        resultado = transponer_matriz(matriz1)
+        print("La matriz transpuesta es de orden {}x{}\n{}\nResultado:\n{}".format(resultado.shape[0], resultado.shape[1], matriz1, resultado))
+        sub_op = validar_numero_rango("Quieres guardar esta matriz?\n1. Si\n2. No\nRespuesta: ", 1, 2)
+        if sub_op == 1:
+            lista_matrices.append(resultado)
+            print("Matriz guardada en índice {}".format(indice))
+            indice += 1
+            time.sleep(2)
+        else:
+            pass
+    if opcion == 4:
+        matriz = lista_matrices[validar_numero_rango("Indique el índice de la primera matriz de la lista:  ", 1, len(lista_matrices)) - 1]
+        print(matriz)
+        time.sleep(1)
+        escalar = validar_numero("Indique el escalar a multiplicar con la matriz:  ")
+        time.sleep(1)
+        resultado = multiplicar_por_escalar(matriz, escalar)
+        print("La matriz multiplicada por {} =\n{}".format(escalar, resultado))
+        sub_op = validar_numero_rango("Quieres guardar esta matriz?\n1. Si\n2. No\nRespuesta: ", 1, 2)
+        if sub_op == 1:
+            lista_matrices.append(resultado)
+            print("Matriz guardada en índice {}".format(indice))
+            indice += 1
+            time.sleep(2)
+        else:
+            pass
+    if opcion == 5:
+        if len(lista_matrices) < 2:
+            print("Crea otra matriz a la lista para multiplicar")
+        else:
+            matriz1 = lista_matrices[validar_numero_rango("Indique el índice de la primera matriz de la lista:  ", 1, len(lista_matrices)) - 1]
+            print(matriz1)
+            time.sleep(1)
+            matriz2 = lista_matrices[validar_numero_rango("Indique el índice de la segunda matriz de la lista:  ", 1, len(lista_matrices)) - 1]
+            print(matriz2)
+            time.sleep(1)
+            resultado = multiplicar_matrices(matriz1, matriz2)
+            print("Las matrices multiplicadas =\n{}\n*\n{}\n=\n{}".format(matriz1, matriz2, resultado))
+            if type(resultado) == str:
+                pass
+            else:
+                sub_op = validar_numero_rango("Quieres guardar esta matriz?\n1. Si\n2. No\nRespuesta: ", 1, 2)
+                if sub_op == 1:
+                    lista_matrices.append(resultado)
+                    print("Matriz guardada en índice {}".format(indice))
+                    indice += 1
+                    time.sleep(2)
+                else:
+                    pass
+    if opcion == 6:
+        for i in range(len(lista_matrices)):
+            print("Indice {}\n{}".format(i + 1, lista_matrices[i]))
+            time.sleep(2)
+    if opcion == 7:
+        print("Chao!")
+        exit()
