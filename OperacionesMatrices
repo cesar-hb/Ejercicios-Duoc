@@ -61,11 +61,17 @@ def sumar_matrices(matriz1, matriz2):
 
 
 def multiplicar_por_escalar(matriz, escalar):
-    for i in range(len(matriz)):
-        for j in range(len(matriz[0])):
-            matriz[i][j] = matriz[i][j] * escalar
+    filas = range(len(matriz))
+    columnas = range(len(matriz[0]))
+
+    matriz_nueva = np.zeros((len(matriz), len(matriz[0])), dtype=object)
+
+    for i in filas:
+        for j in columnas:
+            matriz_nueva[i][j] = matriz[i][j] * escalar
+
     # Escribir matriz * escalar da el mismo resultado en una lista
-    return matriz
+    return matriz_nueva
 
 
 def transponer_matriz(matriz):
